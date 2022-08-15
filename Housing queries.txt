@@ -1,0 +1,214 @@
+----- Phahlamohlaka M ------------------
+----- 28/03/2022 -----------------------
+----- SQL IMPORT EXCEL DATA AND CLEAN --
+
+  ---------------------------------
+  --displaying  Housing table------
+  ---------------------------------
+
+ select *
+ from PROJECT.dbo.HousingTable
+
+  
+
+
+SELECT PropertyAddress
+FROM PROJECT.dbo.HousingTable
+WHERE SaleDate like ' %  July 9, 2015
+%' ; 
+
+-----------------------------
+-- Standardize Date Format -- 
+-----------------------------
+   
+ 
+
+select SaleDate,CONVERT(date,SaleDate) 
+from PROJECT.dbo.HousingTable
+
+update HousingTable
+set SaleDate = CONVERT(date,SaleDate) 
+  
+Select *
+from PROJECT.dbo.HousingTable
+
+
+
+
+------------------------------------------------
+--Joining uniqueID if parcelID is the same -----
+------------------------------------------------
+
+     
+--order by ParcelID
+
+Select a.ParcelID, a.PropertyAddress, b.ParcelID, b.PropertyAddress, ISNULL(a.PropertyAddress,b.PropertyAddress)
+From PROJECT.dbo.HousingTable a
+JOIN PROJECT.dbo.HousingTable b
+on a.ParcelID = b.ParcelID
+AND a.[UniqueID ] <> b.[UniqueID ]
+Where a.PropertyAddress is null
+
+Update a
+SET PropertyAddress = ISNULL(a.PropertyAddress,b.PropertyAddress)
+From PROJECT.dbo.HousingTable a
+JOIN PROJECT.dbo.HousingTable b
+on a.ParcelID = b.ParcelID
+AND a.[UniqueID ] <> b.[UniqueID ]
+Where a.PropertyAddress is null
+
+--------------------------------------------------------------------------------
+-----Breaking out OwnerAddress into Individual Columns (Address, City, State)---
+--------------------------------------------------------------------------------
+
+Select OwnerAddress
+From PROJECT.dbo.HousingTable
+     
+-----chopping data from OwnerAddress-----------------
+Select
+PARSENAME(REPLACE(OwnerAddress, ',', '.') , 3)
+,PARSENAME(REPLACE(OwnerAddress, ',', '.') , 2)
+,PARSENAME(REPLACE(OwnerAddress, ',', '.') , 1)
+From PROJECT.dbo.HousingTable
+
+----adding new column and updating  data------------
+----------------------------------------------------
+
+----adding new coloumn as OwnerSplitAddress --------
+alter table HousingTable
+Add OwnerSplitAddress Nvarchar(255);
+
+-----updating data in OwnerSplitAddress coloumn------
+update HousingTable
+set OwnerSplitAddress = PARSENAME(REPLACE(OwnerAddress, ',', '.') ,3)
+
+
+
+-------adding new coloum and updating data as OwnerSplitCity----
+alter table HousingTable
+Add OwnerSplitCity Nvarchar(255);
+
+update HousingTable
+set OwnerSplitCity= PARSENAME(REPLACE(OwnerAddress, ',', '.') ,2)
+
+
+	  
+-------adding new coloum and updating data OwnerSplitState----
+alter table  HousingTable
+Add OwnerSplitState Nvarchar(255);
+
+update  HousingTable
+set OwnerSplitState= PARSENAME(REPLACE(OwnerAddress, ',', '.') ,1)
+
+
+--------------------------------------------------------------------------
+-- Breaking out PropertyAddress into Individual Columns (Address, City)---
+--------------------------------------------------------------------------
+	     
+Select PropertyAddress
+From PROJECT.dbo.HousingTable
+
+----chopping data from PropertyAddress-----------
+Select
+PARSENAME(REPLACE(PropertyAddress, ',', '.') , 2)
+,PARSENAME(REPLACE(PropertyAddress, ',', '.') , 1)
+From PROJECT.dbo.HousingTable
+
+-----adding new coloum and updating data as PropertySplitAddress---
+alter table HousingTable
+Add PropertySplitAddress Nvarchar(255);
+
+
+update HousingTable
+set  PropertySplitAddress= PARSENAME(REPLACE(PropertyAddress, ',', '.') ,2)
+
+
+
+-----adding new coloumn and updating data "PropertySplitCity"----
+
+alter table HousingTable
+Add PropertySplitCity Nvarchar(255);
+
+update HousingTable
+set PropertySplitCity= PARSENAME(REPLACE(PropertyAddress, ',', '.') ,1)
+
+
+          
+------------------------------------------------------------
+-- Change Y and N to Yes and No in "Sold as Vacant" field---
+------------------------------------------------------------
+
+
+---counting sold as vacant------
+Select Distinct(SoldAsVacant), Count(SoldAsVacant)
+From PROJECT.dbo.HousingTable
+Group by SoldAsVacant
+order by 2
+
+-------- Change Y and N to Yes and No ----------
+
+Select SoldAsVacant
+, CASE When SoldAsVacant = 'Y' THEN 'Yes'
+When SoldAsVacant = 'N' THEN 'No'
+ELSE SoldAsVacant
+END
+From PROJECT.dbo.HousingTable
+
+          
+----------count overall of yes annd no after combining yes & y and no & n-------
+Update HousingTable
+SET SoldAsVacant = CASE When SoldAsVacant = 'Y' THEN 'Yes'
+When SoldAsVacant = 'N' THEN 'No'
+ELSE SoldAsVacant
+END
+
+
+---------------------------------------------------
+---------removing duplicates ----------------------
+---------------------------------------------------
+
+WITH RowNumCTE AS(
+Select *,
+ROW_NUMBER() OVER (
+PARTITION BY ParcelID,
+PropertyAddress,
+SalePrice,
+LegalReference
+ORDER BY
+UniqueID
+) row_num
+
+From PROJECT.dbo.HousingTable
+--order by ParcelID
+)
+Select *
+From RowNumCTE
+Where row_num > 1
+Order by PropertyAddress
+
+
+------------------------------------------
+alter table HousingTable
+Add jordaa Nvarchar(255);
+
+alter table HousingTable
+Add redbat Nvarchar(255); 
+
+
+
+
+--------------searching-------------------
+	 
+SELECT PropertyAddress
+FROM PROJECT.dbo.HousingTable
+WHERE SaleDate like ' %  July 9, 2015
+%' ;
+
+----------------------------------------------------------------
+-- Delete Unused Columns
+----------------------------------------------------------------
+select *
+from PROJECT.dbo.HousingTable
+
+alter table PROJECT.dbo.HousingTable
+drop column jordaa,redbat
