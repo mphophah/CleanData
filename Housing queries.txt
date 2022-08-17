@@ -9,7 +9,52 @@
  select *
  from PROJECT.dbo.HousingTable
 
-  
+
+------------------------------
+----------insert a record-----
+------------------------------
+INSERT INTO HousingTable (UniqueID, ParcelID, LandUse, PropertyAddress, SaleDate, SalePrice, LegalReference, SoldAsVacant, OwnerName, OwnerAddress, Acreage, TaxDistrict, LandValue, BuildingValue, TotalValue, YearBuilt, Bedrooms, FullBath, HalfBath)
+VALUES (66918, '004 00 0 230.00',	'DUPLEX', '2087 MABUNDA BB,ATTEREDGEDVILLE', '2017-02-10 00:00:00.000',	676000,	20140719-0053768,	'yes', 'JSIES,DOALI P&JACK',	'1669 VAN WYK TT, MSHONGOVILLE, ZN',	3.5	,'CITY OF GOODLETTSVILLE',	60000,	289100,	319000,	1988,	6,	5,	2);
+
+
+-------------------------------
+----------Update a record------
+-------------------------------
+UPDATE HousingTable
+SET LandUse = 'SINGLE FAMILY', OwnerName= 'MPHO,PHAHLAMOHLAKA'
+WHERE UniqueID = 66918;
+
+
+-------------------------------
+-----------Delete a record-----
+-------------------------------
+DELETE FROM HousingTable WHERE UniqueID= 66918;
+
+
+------------------------------------------------------------
+-----------------Using Case Statement-----------------------
+------------------------------------------------------------
+SELECT UniqueID, OwnerName,
+CASE
+    WHEN SalePrice > 200000 THEN 'Best house standard'
+    WHEN SalePrice = 230000 THEN 'Avarage Price for house'
+    ELSE 'Under priced house'
+END AS PriceStatus
+FROM HousingTable;
+
+
+---------------------------------
+--Select - Distinct - UniqueID---
+---------------------------------
+SELECT DISTINCT UniqueID
+FROM HousingTable
+
+
+-----------------------------------------------------------------
+--Reporting with Concatenation - OwnerName and PropertyAddress - Code-----
+-----------------------------------------------------------------
+SELECT CONCAT(OwnerName,' - ',PropertyAddress) AS 'House Details'
+FROM HousingTable  
 
 
 SELECT PropertyAddress
@@ -17,10 +62,10 @@ FROM PROJECT.dbo.HousingTable
 WHERE SaleDate like ' %  July 9, 2015
 %' ; 
 
+
 -----------------------------
 -- Standardize Date Format -- 
 -----------------------------
-   
  
 
 select SaleDate,CONVERT(date,SaleDate) 
@@ -33,12 +78,9 @@ Select *
 from PROJECT.dbo.HousingTable
 
 
-
-
 ------------------------------------------------
 --Joining uniqueID if parcelID is the same -----
 ------------------------------------------------
-
      
 --order by ParcelID
 
